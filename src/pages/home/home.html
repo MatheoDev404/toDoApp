@@ -1,14 +1,89 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Ionic Blank
+      Mes tâches
     </ion-title>
+    <ion-buttons end>
+      <span class="tasksNb">
+        {{(tasks | taskFilter: false).length}}
+      </span>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  The world is your oyster.
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will be your guide.
-  </p>
+
+  <div padding *ngIf="tasks.length === 0">
+    <h5 text-center>
+      Aucunes tâche pour le moment
+    </h5>
+  </div>
+
+  <ion-list>
+    <ion-item-sliding *ngFor="let task of tasks | taskFilter: false">
+      <ion-item>
+        <ion-label>{{task.name}}</ion-label>
+        <ion-checkbox [checked]="task.status"
+                      [(ngModel)]="task.status"
+                      [class.done]="task.status"
+                      (ionChange)="saveOurTasks()"
+        ></ion-checkbox>
+        <ion-note *ngIf="task.duedate" class="todo-note" item-end>
+          <span>&Eacute;chéance</span>
+          {{ task.duedate | moment }}
+        </ion-note>
+      </ion-item>
+      <ion-item-options (ionSwipe)="deleteTask(task)" side="right">
+        <button ion-button  expandable 
+                color="danger"
+                (click)="deleteTask(task)"
+        >Suprimer</button>
+      </ion-item-options>
+    </ion-item-sliding> 
+
+    <ion-item-sliding *ngFor="let task of tasks | taskFilter: true">
+      <ion-item>
+        <ion-label>{{task.name}}</ion-label>
+        <ion-checkbox [checked]="task.status"
+                      [(ngModel)]="task.status"
+                      [class.done]="task.status"
+                      (ionChange)="saveOurTasks()"
+        ></ion-checkbox>
+        <ion-note *ngIf="task.duedate" class="todo-note" item-end>
+          <span>&Eacute;chéance</span>
+          {{ task.duedate | moment }}
+        </ion-note>
+      </ion-item>
+      <ion-item-options (ionSwipe)="deleteTask(task)" side="right">
+        <button ion-button  expandable 
+                color="danger"
+                (click)="deleteTask(task)"
+        >Suprimer</button>
+      </ion-item-options>
+    </ion-item-sliding> 
+
+    <!-- Ajouter une tâche -->
+    <ion-item *ngIf="active">
+      <!-- [()] toujours si on travaille avec le model -->
+      <!-- ionBlur fonctionne comme le change sur desktop -->
+      <ion-input type="text"
+                 placeholder="Ajouter une tâche ..."
+                 [(ngModel)]="task.name"
+                 (ionBlur)="saveTask()"
+                 (keypress)="checkKey($event.keyCode)"
+      ></ion-input>
+      <button ion-button item-left clear class="todo-calendar" (click)="picker.open()">
+        <ion-icon name="calendar"></ion-icon>
+        <ion-datetime #picker displayFormat="DD/MM/YYYY" 
+                      pickerFormat="DD/MM/YYYY"
+                      doneText="Confirmer"
+                      cancelText="Annuler"
+                      [(ngModel)]="task.duedate"
+                      max="{{ (date.getFullYear() + 5) }}"
+                      min="{{ now }}"
+        ></ion-datetime>
+      </button>
+    </ion-item>
+
+  </ion-list>
 </ion-content>
